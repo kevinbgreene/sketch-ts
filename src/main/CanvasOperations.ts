@@ -1,12 +1,18 @@
-import {
-  Box,
-  Circle,
-  CSSColor,
-  ICanvasOperations,
-  Line,
-  Point,
-  Size,
-} from './types';
+import { Box, Circle, Line, Point, Size } from './shapes';
+import { CSSColor } from './colors';
+
+export interface ICanvasOperations {
+  canvas: Size;
+  isMouseDown: boolean;
+  mousePosition: Point;
+  isKeyDown(...keys: ReadonlyArray<string>): boolean;
+  circle(shape: Circle): void;
+  rect(shape: Box): void;
+  clear(): void;
+  fill(color: CSSColor): void;
+  line(line: Line): void;
+  resize(size: Size): void;
+}
 
 export class CanvasOperations implements ICanvasOperations {
   #context: CanvasRenderingContext2D;
@@ -39,13 +45,20 @@ export class CanvasOperations implements ICanvasOperations {
       this.#drawingState.mousePosition.y = e.clientX;
     });
 
-    this.#canvas.addEventListener('keydown', (e) => {
+    document.addEventListener('keydown', (e) => {
       this.#drawingState.downKeys.add(e.key);
     });
 
-    this.#canvas.addEventListener('keydown', (e) => {
+    document.addEventListener('keyup', (e) => {
       this.#drawingState.downKeys.delete(e.key);
     });
+  }
+
+  get canvas(): Size {
+    return {
+      width: this.#canvas.width,
+      height: this.#canvas.height,
+    };
   }
 
   get isMouseDown(): boolean {

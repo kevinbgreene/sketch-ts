@@ -1,8 +1,10 @@
 import { CanvasOperations } from './CanvasOperations';
-import { LoopCallback, Size } from './types';
+import { Size } from './shapes';
 
-type SketchOptions = Readonly<{
-  root?: HTMLElement;
+export type LoopCallback = (ops: CanvasOperations) => void;
+
+export type SketchOptions = Readonly<{
+  root: HTMLElement;
   canvas: Size;
 }>;
 
@@ -17,11 +19,17 @@ export class Sketch {
   #operations: CanvasOperations | null = null;
   #callbacks: Array<LoopCallback> = [];
   #loopID: number | null = null;
-  #options: SketchOptions | null = null;
+  #options: SketchOptions = {
+    root: document.body,
+    canvas: Sketch.DEFAULT_SIZE,
+  };
 
-  init(options: SketchOptions): void {
+  init(options: Partial<SketchOptions>): void {
     if (this.#loopID == null) {
-      this.#options = options;
+      this.#options = {
+        ...this.#options,
+        ...options,
+      };
     } else {
       console.warn(
         `Canvas is already initialized, change state via loop operations`,
@@ -52,11 +60,9 @@ export class Sketch {
     }
 
     this.#canvas = document.createElement('canvas');
-    this.#canvas.width =
-      this.#options?.canvas.width ?? Sketch.DEFAULT_SIZE.width;
-    this.#canvas.height =
-      this.#options?.canvas.height ?? Sketch.DEFAULT_SIZE.height;
-    (this.#options?.root ?? document.body).append(this.#canvas);
+    this.#canvas.width = this.#options.canvas.width;
+    this.#canvas.height = this.#options.canvas.height;
+    this.#options.root.append(this.#canvas);
     return this.#canvas;
   }
 

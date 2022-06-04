@@ -5,7 +5,7 @@
   "main": "dist/main/index.js",
   "types": "dist/main/index.d.ts",
   "scripts": {
-    "start:dev": "parcel ./index.html",
+    "start:dev": "rimraf .parcel-cache dist && parcel ./index.html",
     "format": "prettier --write 'src/**/*.ts'",
     "clean": "rimraf dist",
     "clean:all": "npm run clean -- node_modules",
@@ -14,7 +14,7 @@
     "pretest": "npm run build",
     "test": "node dist/tests/index.js"
   },
-  "author": "",
+  "author": "Kevin Greene",
   "license": "ISC",
   "devDependencies": {
     "@parcel/transformer-typescript-tsc": "^2.6.0",
