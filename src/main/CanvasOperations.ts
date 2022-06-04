@@ -5,7 +5,7 @@ export interface ICanvasOperations {
   canvas: Size;
   isPointerDown: boolean;
   pointerPosition: Point;
-  isKeyDown(...keys: ReadonlyArray<string>): boolean;
+  isKeyPressed(...keys: ReadonlyArray<string>): boolean;
   circle(shape: Circle): void;
   rect(shape: Box): void;
   clear(): void;
@@ -16,26 +16,36 @@ export interface ICanvasOperations {
   resize(size: Size): void;
 }
 
+type DrawingState = {
+  pointerPosition: { x: number; y: number };
+  isPointerDown: boolean;
+  // https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values
+  pressedKeys: Set<string>;
+  fontSize: number;
+  strokeWidth: number;
+};
+
 export class CanvasOperations implements ICanvasOperations {
+  static DEFAULT_STROKE_WIDTH: number = 3;
+
   #context: CanvasRenderingContext2D;
   #canvas: HTMLCanvasElement;
-  #drawingState: {
-    pointerPosition: { x: number; y: number };
-    isPointerDown: boolean;
-    // https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values
-    downKeys: Set<string>;
-    fontSize: number;
-  } = {
+  #drawingState: DrawingState = {
     pointerPosition: { x: 0, y: 0 },
     isPointerDown: false,
-    downKeys: new Set(),
+    pressedKeys: new Set(),
     fontSize: 12,
+    strokeWidth: CanvasOperations.DEFAULT_STROKE_WIDTH,
   };
 
   constructor(context: CanvasRenderingContext2D) {
     this.#context = context;
     this.#canvas = context.canvas;
 
+    this.#addEventListeners();
+  }
+
+  #addEventListeners(): void {
     this.#canvas.addEventListener('pointerdown', () => {
       this.#drawingState.isPointerDown = true;
     });
@@ -50,11 +60,11 @@ export class CanvasOperations implements ICanvasOperations {
     });
 
     document.addEventListener('keydown', (e) => {
-      this.#drawingState.downKeys.add(e.key);
+      this.#drawingState.pressedKeys.add(e.key);
     });
 
     document.addEventListener('keyup', (e) => {
-      this.#drawingState.downKeys.delete(e.key);
+      this.#drawingState.pressedKeys.delete(e.key);
     });
   }
 
@@ -73,9 +83,9 @@ export class CanvasOperations implements ICanvasOperations {
     return this.#drawingState.pointerPosition;
   }
 
-  isKeyDown(...keys: ReadonlyArray<string>): boolean {
+  isKeyPressed(...keys: ReadonlyArray<string>): boolean {
     for (const key of keys) {
-      if (!this.#drawingState.downKeys.has(key)) {
+      if (!this.#drawingState.pressedKeys.has(key)) {
         return false;
       }
     }
@@ -100,7 +110,7 @@ export class CanvasOperations implements ICanvasOperations {
 
   rect(shape: Box): void {
     this.#context.fillStyle = 'white';
-    this.#context.lineWidth = 3;
+    this.#context.lineWidth = this.#drawingState.strokeWidth;
     this.#context.strokeStyle = 'black';
     this.#context.strokeRect(
       shape.location.x,
@@ -120,8 +130,8 @@ export class CanvasOperations implements ICanvasOperations {
     this.#context.fillRect(0, 0, this.#canvas.width, this.#canvas.height);
   }
 
-  line({ from, to, weight }: Line): void {
-    this.#context.lineWidth = weight ?? 3;
+  line({ from, to }: Line): void {
+    this.#context.lineWidth = this.#drawingState.strokeWidth;
     this.#context.strokeStyle = 'black';
     this.#context.beginPath();
     this.#context.moveTo(from.x, from.y);
@@ -132,6 +142,10 @@ export class CanvasOperations implements ICanvasOperations {
 
   fontSize(size: number): void {
     this.#drawingState.fontSize = size;
+  }
+
+  strokeWidth(width: number): void {
+    this.#drawingState.strokeWidth = width;
   }
 
   text(text: Text): void {

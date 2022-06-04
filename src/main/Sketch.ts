@@ -25,7 +25,7 @@ export class Sketch {
   };
 
   init(options: Partial<SketchOptions>): void {
-    if (this.#loopID == null) {
+    if (this.#canvas == null) {
       this.#options = {
         ...this.#options,
         ...options,

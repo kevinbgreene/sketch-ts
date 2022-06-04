@@ -7,6 +7,42 @@
     <title>Document</title>
   </head>
   <body>
-    <script type="module" src="./src/main/example.ts" />
+    <script type="module">
+      import { sketch } from './src/main/index.ts';
+
+      sketch.init({
+        canvas: {
+          width: 400,
+          height: 300,
+        },
+      });
+
+      let posX = 100;
+      let posY = 100;
+
+      sketch.loop((ops) => {
+        ops.clear();
+        ops.fill(`rgba(100, 100, 100, 0.2)`);
+
+        ops.rect({
+          location: {
+            x: posX,
+            y: posY,
+          },
+          size: {
+            width: 50,
+            height: 50,
+          },
+        });
+
+        if (ops.isKeyPressed('ArrowUp')) {
+          posY -= 2;
+        }
+
+        if (ops.isKeyPressed('ArrowDown')) {
+          posY += 2;
+        }
+      });
+    </script>
   </body>
 </html>

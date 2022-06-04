@@ -2,6 +2,10 @@
 
 node_modules/
 
+index.html
+
+src/
+
 dist/tests/
 
 dist/main/example.js
