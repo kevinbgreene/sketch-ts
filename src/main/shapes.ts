@@ -25,3 +25,8 @@ export type Circle = Readonly<{
   location: Point;
   radius: number;
 }>;
+
+export type Text = Readonly<{
+  text: string;
+  location: Point;
+}>;

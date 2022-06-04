@@ -1,4 +1,4 @@
-import { Box, Circle, Line, Point, Size } from './shapes';
+import { Box, Circle, Line, Point, Size, Text } from './shapes';
 import { CSSColor } from './colors';
 
 export interface ICanvasOperations {
@@ -11,6 +11,8 @@ export interface ICanvasOperations {
   clear(): void;
   fill(color: CSSColor): void;
   line(line: Line): void;
+  fontSize(size: number): void;
+  text(text: Text): void;
   resize(size: Size): void;
 }
 
@@ -22,10 +24,12 @@ export class CanvasOperations implements ICanvasOperations {
     isMouseDown: boolean;
     // https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values
     downKeys: Set<string>;
+    fontSize: number;
   } = {
     mousePosition: { x: 0, y: 0 },
     isMouseDown: false,
     downKeys: new Set(),
+    fontSize: 12,
   };
 
   constructor(context: CanvasRenderingContext2D) {
@@ -125,6 +129,15 @@ export class CanvasOperations implements ICanvasOperations {
     this.#context.lineTo(to.x, to.y);
     this.#context.stroke();
     this.#context.closePath();
+  }
+
+  fontSize(size: number): void {
+    this.#drawingState.fontSize = size;
+  }
+
+  text(text: Text): void {
+    this.#context.font = `${this.#drawingState.fontSize}px sans-serif`;
+    this.#context.fillText(text.text, text.location.x, text.location.y);
   }
 
   resize(size: Size): void {
