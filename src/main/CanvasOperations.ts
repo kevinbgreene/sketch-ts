@@ -3,8 +3,8 @@ import { CSSColor } from './colors';
 
 export interface ICanvasOperations {
   canvas: Size;
-  isMouseDown: boolean;
-  mousePosition: Point;
+  isPointerDown: boolean;
+  pointerPosition: Point;
   isKeyDown(...keys: ReadonlyArray<string>): boolean;
   circle(shape: Circle): void;
   rect(shape: Box): void;
@@ -20,14 +20,14 @@ export class CanvasOperations implements ICanvasOperations {
   #context: CanvasRenderingContext2D;
   #canvas: HTMLCanvasElement;
   #drawingState: {
-    mousePosition: { x: number; y: number };
-    isMouseDown: boolean;
+    pointerPosition: { x: number; y: number };
+    isPointerDown: boolean;
     // https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values
     downKeys: Set<string>;
     fontSize: number;
   } = {
-    mousePosition: { x: 0, y: 0 },
-    isMouseDown: false,
+    pointerPosition: { x: 0, y: 0 },
+    isPointerDown: false,
     downKeys: new Set(),
     fontSize: 12,
   };
@@ -37,16 +37,16 @@ export class CanvasOperations implements ICanvasOperations {
     this.#canvas = context.canvas;
 
     this.#canvas.addEventListener('pointerdown', () => {
-      this.#drawingState.isMouseDown = true;
+      this.#drawingState.isPointerDown = true;
     });
 
     this.#canvas.addEventListener('pointerup', () => {
-      this.#drawingState.isMouseDown = false;
+      this.#drawingState.isPointerDown = false;
     });
 
     this.#canvas.addEventListener('pointermove', (e) => {
-      this.#drawingState.mousePosition.x = e.clientX;
-      this.#drawingState.mousePosition.y = e.clientX;
+      this.#drawingState.pointerPosition.x = e.clientX;
+      this.#drawingState.pointerPosition.y = e.clientX;
     });
 
     document.addEventListener('keydown', (e) => {
@@ -65,12 +65,12 @@ export class CanvasOperations implements ICanvasOperations {
     };
   }
 
-  get isMouseDown(): boolean {
-    return this.#drawingState.isMouseDown;
+  get isPointerDown(): boolean {
+    return this.#drawingState.isPointerDown;
   }
 
-  get mousePosition(): Point {
-    return this.#drawingState.mousePosition;
+  get pointerPosition(): Point {
+    return this.#drawingState.pointerPosition;
   }
 
   isKeyDown(...keys: ReadonlyArray<string>): boolean {
@@ -121,7 +121,6 @@ export class CanvasOperations implements ICanvasOperations {
   }
 
   line({ from, to, weight }: Line): void {
-    this.#context.fillStyle = 'white';
     this.#context.lineWidth = weight ?? 3;
     this.#context.strokeStyle = 'black';
     this.#context.beginPath();
