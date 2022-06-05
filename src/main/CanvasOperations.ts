@@ -1,31 +1,18 @@
 import { Box, Circle, Line, Point, Size, Text } from './shapes';
 import { CSSColor } from './colors';
 
-export interface ICanvasOperations {
-  canvas: Size;
-  isPointerDown: boolean;
-  pointerPosition: Point;
-  isKeyPressed(...keys: ReadonlyArray<string>): boolean;
-  circle(shape: Circle): void;
-  rect(shape: Box): void;
-  clear(): void;
-  fill(color: CSSColor): void;
-  line(line: Line): void;
-  fontSize(size: number): void;
-  text(text: Text): void;
-  resize(size: Size): void;
-}
-
 type DrawingState = {
   pointerPosition: { x: number; y: number };
   isPointerDown: boolean;
   // https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values
   pressedKeys: Set<string>;
   fontSize: number;
+  fillColor: CSSColor;
+  strokeColor: CSSColor;
   strokeWidth: number;
 };
 
-export class CanvasOperations implements ICanvasOperations {
+export class CanvasOperations {
   static DEFAULT_STROKE_WIDTH: number = 3;
 
   #context: CanvasRenderingContext2D;
@@ -35,6 +22,8 @@ export class CanvasOperations implements ICanvasOperations {
     isPointerDown: false,
     pressedKeys: new Set(),
     fontSize: 12,
+    fillColor: 'white',
+    strokeColor: 'black',
     strokeWidth: CanvasOperations.DEFAULT_STROKE_WIDTH,
   };
 
@@ -104,14 +93,16 @@ export class CanvasOperations implements ICanvasOperations {
       0,
       2 * Math.PI,
     );
+    this.#context.lineWidth = this.#drawingState.strokeWidth;
+    this.#context.strokeStyle = this.#drawingState.strokeColor;
     this.#context.stroke();
     this.#context.closePath();
   }
 
   rect(shape: Box): void {
-    this.#context.fillStyle = 'white';
+    this.#context.fillStyle = this.#drawingState.fillColor;
     this.#context.lineWidth = this.#drawingState.strokeWidth;
-    this.#context.strokeStyle = 'black';
+    this.#context.strokeStyle = this.#drawingState.strokeColor;
     this.#context.strokeRect(
       shape.location.x,
       shape.location.y,
@@ -132,7 +123,7 @@ export class CanvasOperations implements ICanvasOperations {
 
   line({ from, to }: Line): void {
     this.#context.lineWidth = this.#drawingState.strokeWidth;
-    this.#context.strokeStyle = 'black';
+    this.#context.strokeStyle = this.#drawingState.strokeColor;
     this.#context.beginPath();
     this.#context.moveTo(from.x, from.y);
     this.#context.lineTo(to.x, to.y);
@@ -142,6 +133,14 @@ export class CanvasOperations implements ICanvasOperations {
 
   fontSize(size: number): void {
     this.#drawingState.fontSize = size;
+  }
+
+  fillColor(color: CSSColor): void {
+    this.#drawingState.fillColor = color;
+  }
+
+  strokeColor(color: CSSColor): void {
+    this.#drawingState.strokeColor = color;
   }
 
   strokeWidth(width: number): void {
